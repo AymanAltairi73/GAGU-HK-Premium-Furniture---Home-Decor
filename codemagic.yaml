@@ -1,0 +1,8 @@
+workflows:
+  test-build:
+    name: Test iOS Build
+    max_build_duration: 60
+    environment:
+      flutter: stable
+    scripts:
+      - flutter pub get
