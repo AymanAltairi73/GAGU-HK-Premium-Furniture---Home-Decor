@@ -1,8 +1,31 @@
 import 'dart:async';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 void main() {
+  // Ensure Flutter binding is initialized
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Catch Flutter framework errors
+  FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.presentError(details);
+    if (kDebugMode) {
+      // In debug mode, use the default error handler
+      FlutterError.dumpErrorToConsole(details);
+    } else {
+      // In release mode, log the error but don't crash
+      debugPrint('Flutter error: ${details.exception}');
+    }
+  };
+
+  // Catch errors outside Flutter framework
+  PlatformDispatcher.instance.onError = (error, stack) {
+    debugPrint('Platform error: $error');
+    return true;
+  };
+
   runApp(const GaguApp());
 }
 
@@ -133,9 +156,7 @@ class GaguApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'GAGU HK',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF141E30),
-        ),
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF141E30)),
         useMaterial3: true,
       ),
       // أول شاشة تظهر للمستخدم.
@@ -144,7 +165,6 @@ class GaguApp extends StatelessWidget {
   }
 }
 
-// شاشة Splash الرئيسية بتصميم بسيط وحديث قبل الدخول للـ WebView.
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -156,28 +176,21 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    // ننتظر ثوانٍ بسيطة ثم ننتقل تلقائياً إلى صفحة الـ WebView.
     Future.delayed(const Duration(seconds: 3), () {
       if (!mounted) return;
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute<void>(
-          builder: (_) => const GaguWebPage(),
-        ),
+        MaterialPageRoute<void>(builder: (_) => const GaguWebPage()),
       );
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    // واجهة بسيطة تحتوي على خلفية متدرجة، شعار، اسم العلامة، وصف قصير، ومؤشر تحميل.
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [
-              Color(0xFF141E30),
-              Color(0xFF243B55),
-            ],
+            colors: [Color(0xFF141E30), Color(0xFF243B55)],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
@@ -186,23 +199,19 @@ class _SplashScreenState extends State<SplashScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // مكان مخصص للّوجو، استبدل المسار بالمسار الصحيح للصورة في مشروعك.
               Container(
                 width: 120,
                 height: 120,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: const LinearGradient(
-                    colors: [
-                      Colors.white,
-                      Color(0xFFE0E0E0),
-                    ],
+                    colors: [Colors.white, Color(0xFFE0E0E0)],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.25),
+                      color: Colors.black.withValues(alpha: 0.25),
                       blurRadius: 12,
                       offset: const Offset(0, 6),
                     ),
@@ -212,6 +221,13 @@ class _SplashScreenState extends State<SplashScreen> {
                   child: Image.asset(
                     'assets/logo.png',
                     fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return const Icon(
+                        Icons.store,
+                        size: 60,
+                        color: Colors.white,
+                      );
+                    },
                   ),
                 ),
               ),
@@ -228,10 +244,7 @@ class _SplashScreenState extends State<SplashScreen> {
               const SizedBox(height: 8),
               const Text(
                 'Premium Furniture & Home Decor',
-                style: TextStyle(
-                  color: Colors.white70,
-                  fontSize: 14,
-                ),
+                style: TextStyle(color: Colors.white70, fontSize: 14),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 32),
@@ -299,16 +312,10 @@ class _GaguWebPageState extends State<GaguWebPage> {
       ),
       body: Stack(
         children: [
-          WebViewWidget(
-            controller: _controller,
-          ),
-          if (_isLoading)
-            const Center(
-              child: CircularProgressIndicator(),
-            ),
+          WebViewWidget(controller: _controller),
+          if (_isLoading) const Center(child: CircularProgressIndicator()),
         ],
       ),
     );
   }
 }
-
