@@ -60,12 +60,13 @@ class _SplashScreenState extends State<SplashScreen> {
               ),
               const SizedBox(height: 24),
               const Text(
-                'GAGU HK',
+                'GAGU',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 2,
+
                 ),
               ),
               const SizedBox(height: 8),
